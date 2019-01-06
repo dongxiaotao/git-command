@@ -1,0 +1,89 @@
+branch操作
+
+1、远程没有远程分支，直接把本地分支推向远程
+git push --set-upstream origin feature4（推荐，feature4是本地名字）
+2、当clone仓库之后，默认只拉取master分支，如果要拉取其他远程分支
+首先git fetch
+然后git checkout -b dev origin/dev
+或者git pull origin dev:dev
+3、git push <远程仓库名> <本地分支名>:<远程主机分支名>
+这个是push的完整写法，将本地分支上传到远程分支，例如：
+git push origin dev:dev（如果远程dev不存在会创建远程dev）
+如果省略本地分支名意味着删除远程分支
+git push origin :feature4
+或者删除远程分支
+git push origin -d feature5
+4、如果本地分支和远程分支都已经存在，如何关联
+首先git fetch
+然后git branch --set-upstream-to=origin/dev dev或者git branch --set-upstream  dev origin/dev
+
+5、拉取代码
+git pull <远程库名> <远程分支名>:<本地分支名>
+git pull origin feature6:feature6（本地不存在会默认创建，不会自动切换到新创建的分支）
+
+
+stash操作(会把暂存区和工作区都储藏)
+
+1、存储
+git stash save -- "message"
+2、恢复
+git stash pop（回复后删除）
+git stash pop --index
+git stash pop stash@{id}
+3、删除某个stash
+git stash drop stash@{0}
+4、删除所有stash
+git stash clear
+5、查看stash列表
+git stash list
+
+git 误删文件和恢复指令
+1、git  fsck --lost -found :查看最近移除的文件.
+2、git show  '误删编号'：查看删除文件内容
+3、git merge ‘误删编号’： 本地合并误删的文件内容
+
+git checkout -- file影响的是本地工作区
+恢复文件：恢复到最近一次add或者commit，如果该文件没有add过会报错，如果git rm --cached了也会报错
+
+从暂存区删除
+git rm --cached 文件
+
+git reset --hard head [file]如果文件已经add了，则会删除，如果没有add过，怎不会被删除
+git reset head [file]只会影响暂存区
+git reset origin/master会影响暂存区和本地仓库，不影响工作区
+
+仓库操作：
+
+要添加一个新的远程仓库，可以指定一个简单的名字，以便将来引用，运行 git remote add [shortname] [url]：
+例如：
+git remote add pb git@github.com:michaelliao/learngit.git
+
+仓库切换
+方法一 通过命令直接修改远程地址
+进入git_test根目录
+git remote 查看所有远程仓库， git remote xxx 查看指定远程仓库地址
+git remote set-url origin http://192.168.100.235:9797/john/git_test.git
+切换仓库如果push代码无法push就用强制-f
+方法二 通过命令先删除再添加远程仓库
+进入git_test根目录
+git remote 查看所有远程仓库， git remote xxx 查看指定远程仓库地址
+git remote rm origin
+git remote add origin http://192.168.100.235:9797/john/git_test.git
+方法三 直接修改配置文件
+进入git_test/.git
+vim config 
+ 
+[remote "origin"] 
+url = http://192.168.100.235:9797/shimanqiang/assistant.git 
+fetch = +refs/heads/*:refs/remotes/origin/*
+
+查看提交日志：git log --pretty=oneline
+查看操作日志：git reflog
+
+git merge 按时间轴进行合并，并且每次合并都会增加一次合并提交
+master分支，节点链表指向为：c1<--c3<--c4
+dev分支，节点链表指向为：c1<--c2<--c5
+master分支和dev分支祖先为c1，假定在master分支上做git merge dev合并，得到的提交历史为：
+c1<--c2<--c3<--c4<--c5<--c6
+git rebase不按时间合并，只是把分支提交挪过来并且不会增加合并提交，比较简洁
+c1 c3 c4 c2 c5
